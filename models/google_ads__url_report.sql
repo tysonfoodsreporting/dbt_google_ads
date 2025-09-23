@@ -54,6 +54,7 @@ fields as (
         ad_groups.ad_group_name,
         stats.ad_group_id,
         stats.ad_id,
+        ads.ad_name,
         ads.base_url,
         ads.url_host,
         ads.url_path,
@@ -103,7 +104,7 @@ fields as (
         where ads.source_final_urls is not null
     {% endif %}
 
-    {{ dbt_utils.group_by(18) }}
+    {{ dbt_utils.group_by(19) }}
 )
 
 select *
