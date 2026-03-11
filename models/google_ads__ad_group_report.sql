@@ -72,3 +72,4 @@ fields as (
 
 select *
 from fields
+where lower(campaign_name) not like '%yt-dg%'
