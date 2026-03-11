@@ -10,7 +10,7 @@
 with stats as (
 
     select *
-    from {{ var('account_stats') }}
+    from {{ var('campaign_stats') }}
 ), 
 
 accounts as (
@@ -20,29 +20,37 @@ accounts as (
     where is_most_recent_record = True
 ), 
 
+campaigns as (
+
+    select *
+    from {{ var('campaign_history') }}
+    where is_most_recent_record = True
+), 
+
 fields as (
 
     select
         stats.source_relation,
         stats.date_day,
         accounts.account_name,
-        stats.account_id,
+        accounts.account_id,
         accounts.currency_code,
         accounts.auto_tagging_enabled,
         accounts.time_zone,
         sum(stats.spend) as spend,
         sum(stats.clicks) as clicks,
         sum(stats.impressions) as impressions,
-        sum(stats.conversions) as conversions,
-        sum(stats.conversions_value) as conversions_value,
-        sum(stats.view_through_conversions) as view_through_conversions
-
-        {{ google_ads_persist_pass_through_columns(pass_through_variable='google_ads__account_stats_passthrough_metrics', identifier='stats', transform='sum', coalesce_with=0, exclude_fields=['conversions','conversions_value','view_through_conversions']) }}
-
+        sum(conversions) as conversions,
+        sum(conversions_value) as conversions_value,
+        sum(view_through_conversions) as view_through_conversions
     from stats
+    left join campaigns
+        on stats.campaign_id = campaigns.campaign_id
+        and stats.source_relation = campaigns.source_relation
     left join accounts
-        on stats.account_id = accounts.account_id
-        and stats.source_relation = accounts.source_relation
+        on campaigns.account_id = accounts.account_id
+        and campaigns.source_relation = accounts.source_relation
+    where lower(campaigns.campaign_name) not like '%yt-dg%'
     {{ dbt_utils.group_by(7) }}
 )
 
