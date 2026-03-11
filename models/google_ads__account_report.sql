@@ -50,9 +50,9 @@ fields as (
     left join accounts
         on campaigns.account_id = accounts.account_id
         and campaigns.source_relation = accounts.source_relation
-    {{ dbt_utils.group_by(10) }}
+    where lower(campaigns.campaign_name) not like '%yt-dg%'
+    {{ dbt_utils.group_by(7) }}
 )
 
 select *
 from fields
-where lower(campaign_name) not like '%yt-dg%'
